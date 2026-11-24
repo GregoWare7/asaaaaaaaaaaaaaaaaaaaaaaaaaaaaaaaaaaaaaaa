@@ -1,18 +1,19 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
-import { Minus, Plus, Clock } from "lucide-react";
+import { Minus, Plus, MapPin, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useCart } from "@/lib/cart";
 import { WHATSAPP } from "@/lib/products";
-import { brl, deliveryFee, DELIVERY_OPTIONS, FREE_DELIVERY_FROM } from "@/lib/delivery";
+import { brl, deliveryFee, FREE_DELIVERY_FROM, PRICE_PER_KM } from "@/lib/delivery";
+import { quoteDistance } from "@/lib/freight.functions";
 
 export const Route = createFileRoute("/checkout")({
   head: () => ({
     meta: [
       { title: "Carrinho e entrega | FB Tabacaria" },
-      { name: "description", content: "Escolha entrega local em Cuiabá e veja prazos e custos." },
+      { name: "description", content: "Calcule o frete por km até seu endereço e envie o pedido pelo WhatsApp." },
       { property: "og:title", content: "Carrinho e entrega | FB Tabacaria" },
       { property: "og:description", content: "Entrega local em toda Cuiabá." },
       { property: "og:type", content: "website" },
@@ -24,12 +25,23 @@ export const Route = createFileRoute("/checkout")({
 
 function Checkout() {
   const { lines, setQty, subtotal, clear } = useCart();
-  const [opt, setOpt] = useState("centro");
   const [name, setName] = useState("");
   const [address, setAddress] = useState("");
-  const selected = DELIVERY_OPTIONS.find((o) => o.id === opt)!;
-  const fee = deliveryFee(opt, subtotal);
-  const total = subtotal + fee;
+  const [km, setKm] = useState<number | null>(null);
+  const [quoting, setQuoting] = useState(false);
+  const [quoteError, setQuoteError] = useState("");
+  const fee = km == null ? null : deliveryFee(km, subtotal);
+  const total = subtotal + (fee ?? 0);
+
+  const calc = async () => {
+    if (address.trim().length < 5) { setQuoteError("Digite o endereço completo."); return; }
+    setQuoting(true); setQuoteError(""); setKm(null);
+    try {
+      const r = await quoteDistance({ data: { address } });
+      if (r.ok) setKm(r.km); else setQuoteError(r.error);
+    } catch { setQuoteError("Não foi possível calcular agora. Tente novamente."); }
+    finally { setQuoting(false); }
+  };
 
   if (lines.length === 0)
     return (
@@ -41,7 +53,8 @@ function Checkout() {
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
-    const msg = [`Olá! Sou ${name} e quero fazer um pedido:`, ...lines.map((l) => `• ${l.qty}x ${l.product.name} (${l.flavor}) - ${brl(l.product.price * l.qty)}`), `Entrega: ${selected.label} (${fee === 0 ? "grátis" : brl(fee)}, ${selected.eta})`, `Endereço: ${address}`, `Total: ${brl(total)}`].join("\n");
+    if (km == null || fee == null) { toast.error("Calcule o frete antes de enviar."); return; }
+    const msg = [`Olá! Sou ${name} e quero fazer um pedido:`, ...lines.map((l) => `• ${l.qty}x ${l.product.name} (${l.flavor}) - ${brl(l.product.price * l.qty)}`), `Endereço: ${address}`, `Distância: ${km.toLocaleString("pt-BR")} km`, `Subtotal: ${brl(subtotal)}`, `Frete: ${fee === 0 ? "grátis" : brl(fee)}`, `Total com frete: ${brl(total)}`].join("\n");
     window.open(`https://wa.me/${WHATSAPP}?text=${encodeURIComponent(msg)}`, "_blank");
     toast.success("Pedido enviado pelo WhatsApp!");
     clear();
@@ -64,34 +77,24 @@ function Checkout() {
           ))}
         </section>
         <section className="space-y-3">
-          <h2 className="font-display text-3xl">Região de entrega</h2>
-          {DELIVERY_OPTIONS.map((o) => {
-            const f = deliveryFee(o.id, subtotal);
-            return (
-              <label key={o.id} className={`flex cursor-pointer gap-3 rounded-xl border bg-card p-4 transition ${opt === o.id ? "border-primary shadow-glow" : "border-border"}`}>
-                <input type="radio" name="entrega" value={o.id} checked={opt === o.id} onChange={() => setOpt(o.id)} className="mt-1 accent-primary" />
-                <div className="min-w-0 flex-1">
-                  <div className="flex flex-wrap justify-between gap-2"><span className="font-semibold">{o.label}</span><span className="font-bold text-primary-glow">{f === 0 ? "Grátis" : brl(f)}</span></div>
-                  <p className="text-xs text-muted-foreground">{o.description}</p>
-                  <p className="mt-1 flex items-center gap-1 text-xs"><Clock className="h-3 w-3 text-primary" />{o.eta}</p>
-                </div>
-              </label>
-            );
-          })}
-          <p className="text-xs text-muted-foreground">Entrega grátis em Cuiabá para pedidos a partir de {brl(FREE_DELIVERY_FROM)}.</p>
-        </section>
-        <section className="space-y-3">
+          <h2 className="font-display text-3xl">Entrega</h2>
           <Input required placeholder="Seu nome" value={name} onChange={(e) => setName(e.target.value)} />
-          <Input required placeholder="Endereço completo (rua, número, bairro)" value={address} onChange={(e) => setAddress(e.target.value)} />
+          <div className="flex gap-2">
+            <Input required placeholder="Rua, número, bairro, cidade" value={address} onChange={(e) => { setAddress(e.target.value); setKm(null); }} />
+            <Button type="button" variant="outline" onClick={calc} disabled={quoting}>{quoting ? <Loader2 className="animate-spin" /> : <MapPin />}Calcular frete</Button>
+          </div>
+          {quoteError && <p className="text-sm text-destructive">{quoteError}</p>}
+          {km != null && fee != null && <p className="text-sm">Distância: <b>{km.toLocaleString("pt-BR")} km</b> · Frete: <b className="text-primary-glow">{fee === 0 ? "Grátis" : brl(fee)}</b></p>}
+          <p className="text-xs text-muted-foreground">Frete de {brl(PRICE_PER_KM)} por km, saindo de Costa Verde, Várzea Grande. Grátis para pedidos a partir de {brl(FREE_DELIVERY_FROM)}.</p>
         </section>
       </form>
       <aside className="h-fit space-y-3 rounded-xl border border-primary bg-card p-5 shadow-glow md:sticky md:top-24">
         <h2 className="font-display text-3xl">Resumo</h2>
         <Row k="Subtotal" v={brl(subtotal)} />
-        <Row k="Entrega" v={fee === 0 ? "Grátis" : brl(fee)} />
-        <Row k="Prazo" v={selected.eta} />
-        <div className="border-t border-border pt-3"><Row k="Total" v={brl(total)} bold /></div>
-        <Button form="checkout" type="submit" size="lg" className="w-full">Enviar pedido no WhatsApp</Button>
+        <Row k="Distância" v={km == null ? "—" : `${km.toLocaleString("pt-BR")} km`} />
+        <Row k="Frete" v={fee == null ? "Calcule o frete" : fee === 0 ? "Grátis" : brl(fee)} />
+        <div className="border-t border-border pt-3"><Row k="Total com frete" v={brl(total)} bold /></div>
+        <Button form="checkout" type="submit" size="lg" className="w-full" disabled={km == null}>Enviar pedido no WhatsApp</Button>
         <p className="text-center text-xs text-muted-foreground">Pagamento combinado na entrega.</p>
       </aside>
     </main>

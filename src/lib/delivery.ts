@@ -1,25 +1,13 @@
-export type DeliveryOption = {
-  id: string;
-  type: "delivery";
-  label: string;
-  description: string;
-  fee: number;
-  eta: string;
-};
-
-export const DELIVERY_OPTIONS: DeliveryOption[] = [
-  { id: "centro", type: "delivery", label: "Entrega - Centro / Região Central", description: "Centro, Goiabeiras, Popular, Araés, Duque de Caxias", fee: 8, eta: "Até 1 hora" },
-  { id: "intermediaria", type: "delivery", label: "Entrega - Bairros intermediários", description: "Jardim das Américas, Boa Esperança, CPA, Coxipó, Morada da Serra", fee: 12, eta: "1 a 2 horas" },
-  { id: "distante", type: "delivery", label: "Entrega - Bairros distantes", description: "Pedra 90, Tijucal, Osmar Cabral, Parque Cuiabá e região", fee: 18, eta: "2 a 3 horas" },
-];
-
+// Ponto de saída: Residencial Chapada das Cerejeiras, Costa Verde, Várzea Grande - MT (aprox.)
+export const ORIGIN = { lat: -15.6788, lon: -56.1144, label: "Residencial Chapada das Cerejeiras, Costa Verde, Várzea Grande - MT" };
+export const PRICE_PER_KM = 2;
 export const FREE_DELIVERY_FROM = 200;
 
-export function deliveryFee(optionId: string, subtotal: number): number {
-  const opt = DELIVERY_OPTIONS.find((o) => o.id === optionId);
-  if (!opt) throw new Error("Opção de entrega inválida");
-  if (opt.type === "delivery" && subtotal >= FREE_DELIVERY_FROM) return 0;
-  return opt.fee;
+/** Frete: R$ 2 por km (distância de carro), grátis a partir de R$ 200 em produtos. */
+export function deliveryFee(km: number, subtotal: number): number {
+  if (!Number.isFinite(km) || km < 0) throw new Error("Distância inválida");
+  if (subtotal >= FREE_DELIVERY_FROM) return 0;
+  return Math.round(km * PRICE_PER_KM * 100) / 100;
 }
 
 export const brl = (n: number) => n.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });

@@ -1,7 +1,7 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { Bike, Store, Plus } from "lucide-react";
-import { toast } from "sonner";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import logo from "@/assets/logo.png.asset.json";
 import { Button } from "@/components/ui/button";
 import { CATEGORIES, PRODUCTS, flavorsFor, type Product } from "@/lib/products";
@@ -61,6 +61,8 @@ function ProductCard({ p }: { p: Product }) {
   const { add } = useCart();
   const flavors = flavorsFor(p);
   const [flavor, setFlavor] = useState(flavors[0] ?? "");
+  const [added, setAdded] = useState(false);
+  const navigate = useNavigate();
   return (
     <article className="glow-border flex flex-col rounded-xl bg-card p-4 transition">
       <div className="mb-3 grid aspect-square place-items-center rounded-lg bg-accent">
@@ -74,8 +76,20 @@ function ProductCard({ p }: { p: Product }) {
       </label>
       <div className="mt-3 flex items-center justify-between gap-2">
         <span className="font-bold">{brl(p.price)}</span>
-        <Button size="icon" aria-label={`Adicionar ${p.name}`} onClick={() => { add(p.id, flavor); toast.success(`${p.name} (${flavor}) adicionado`); }}><Plus /></Button>
+        <Button size="icon" aria-label={`Adicionar ${p.name}`} onClick={() => { add(p.id, flavor); setAdded(true); }}><Plus /></Button>
       </div>
+      <Dialog open={added} onOpenChange={setAdded}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Adicionado ao carrinho</DialogTitle>
+            <DialogDescription>{p.name} ({flavor}) · {brl(p.price)}</DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={() => setAdded(false)}>Continuar comprando</Button>
+            <Button onClick={() => { setAdded(false); navigate({ to: "/checkout" }); }}>Finalizar compra</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </article>
   );
 }

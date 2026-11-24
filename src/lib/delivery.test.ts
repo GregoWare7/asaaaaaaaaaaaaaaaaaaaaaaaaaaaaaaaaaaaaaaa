@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { deliveryFee } from "./delivery";
 
-describe("taxas de entrega", () => {
-  it("região central custa R$ 8", () => expect(deliveryFee("centro", 50)).toBe(8));
-  it("bairros distantes custam R$ 18", () => expect(deliveryFee("distante", 50)).toBe(18));
-  it("entrega grátis a partir de R$ 200", () => expect(deliveryFee("distante", 200)).toBe(0));
+describe("frete por km", () => {
+  it("cobra R$ 2 por km", () => expect(deliveryFee(10, 50)).toBe(20));
+  it("km quebrado: 7,3 km custa R$ 14,60", () => expect(deliveryFee(7.3, 50)).toBe(14.6));
+  it("entrega grátis a partir de R$ 200", () => expect(deliveryFee(10, 200)).toBe(0));
 });
