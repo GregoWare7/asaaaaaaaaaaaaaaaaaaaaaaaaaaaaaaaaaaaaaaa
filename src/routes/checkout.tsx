@@ -14,7 +14,6 @@ import {
   deliveryFee,
   isOutsideDeliveryArea,
   MAX_DELIVERY_KM,
-  PRICE_PER_KM,
   type DeliveryPoint,
 } from "@/lib/delivery";
 import { quoteDistance, quoteRoute, reverseAddress } from "@/lib/freight.functions";
@@ -154,7 +153,7 @@ function Checkout() {
       ...lines.map((line) => `• ${line.qty}x ${line.product.name} (${line.flavor}) - ${brl(line.product.price * line.qty)}`),
       `Endereço: ${fullAddress}`,
       `Local no mapa: https://www.google.com/maps?q=${destination.lat},${destination.lon}`,
-      `Distância pela rota: ${km.toLocaleString("pt-BR")} km (cobrança: ${billableKm(km)} km)`,
+      `Distância pela rota: ${km.toLocaleString("pt-BR")} km (faixa de cobrança: ${billableKm(km)} km)`,
       `Subtotal: ${brl(subtotal)}`,
       `Frete: ${brl(fee)}`,
       `Total com frete: ${brl(total)}`,
@@ -232,11 +231,11 @@ function Checkout() {
           {outsideArea && <p role="alert" className="rounded-lg border border-destructive p-3 text-sm font-semibold text-destructive">Endereço fora da área de entrega</p>}
           {km != null && fee != null && (
             <div className="rounded-lg bg-muted p-3 text-sm">
-              <p>Distância pela rota: <b>{km.toLocaleString("pt-BR")} km</b> · Cobrança: <b>{billableKm(km)} km</b></p>
+              <p>Distância pela rota: <b>{km.toLocaleString("pt-BR")} km</b> · Faixa de cobrança: <b>{billableKm(km)} km</b></p>
               <p className="mt-1">Frete: <b className="text-primary-glow">{brl(fee)}</b></p>
             </div>
           )}
-          <p className="text-xs text-muted-foreground">Frete de {brl(PRICE_PER_KM)} por km da rota, arredondado para cima. Entregas até {MAX_DELIVERY_KM} km, saindo do Residencial Chapada das Cerejeiras.</p>
+          <p className="text-xs text-muted-foreground">Frete de {brl(10)} de 100 metros até 6,9 km, depois +{brl(2)} por km. Entregas até {MAX_DELIVERY_KM} km, saindo do Residencial Chapada das Cerejeiras.</p>
         </section>
       </form>
 

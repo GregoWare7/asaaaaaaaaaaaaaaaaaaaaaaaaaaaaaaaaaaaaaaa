@@ -5,7 +5,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import logo from "@/assets/logo.png.asset.json";
 import { Button } from "@/components/ui/button";
 import { CATEGORIES, PRODUCTS, flavorsFor, type Product } from "@/lib/products";
-import { brl, PRICE_PER_KM } from "@/lib/delivery";
+import { brl } from "@/lib/delivery";
 import { useCart } from "@/lib/cart";
 
 export const Route = createFileRoute("/")({
@@ -31,7 +31,7 @@ function Index() {
         <img src={logo.url} alt="Logo FB Tabacaria" className="h-40 w-40 rounded-full shadow-glow md:h-56 md:w-56" />
         <div className="space-y-4">
           <h1 className="font-display text-5xl leading-none tracking-wide text-glow md:text-7xl">A sua tabacaria em Cuiabá</h1>
-          <p className="text-muted-foreground">Entrega rápida na cidade. Frete de {brl(PRICE_PER_KM)} por km da rota.</p>
+          <p className="text-muted-foreground">Entrega rápida na cidade. Frete a partir de {brl(10)} (até 6,9 km).</p>
           <div className="flex flex-wrap justify-center gap-3 text-sm md:justify-start">
             <span className="flex items-center gap-2 rounded-full border border-border px-3 py-1.5"><Bike className="h-4 w-4 text-primary" /> Entrega em até 1h</span>
             <span className="flex items-center gap-2 rounded-full border border-border px-3 py-1.5"><Store className="h-4 w-4 text-primary" /> (65) 99803-8731</span>
