@@ -29,4 +29,4 @@ use the editor.
 - **Secrets.** Lovable manages them. Do not put secret values in the repo.
 <!-- LOVABLE:END -->
 
-- Delivery distance: geocode with OpenStreetMap Nominatim + OSRM driving route in a server function (src/lib/freight.functions.ts); fee rule lives in src/lib/delivery.ts so it stays testable. Why: no API key needed.
+- Delivery distance: use a fixed origin and OpenStreetMap Nominatim + OSRM driving routes in src/lib/freight.functions.ts; destination selection uses a client-only Leaflet map and fee rules stay testable in src/lib/delivery.ts. Why: accurate routes without an API key.
