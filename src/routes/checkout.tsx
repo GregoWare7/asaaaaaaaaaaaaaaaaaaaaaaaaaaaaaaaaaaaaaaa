@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useCart } from "@/lib/cart";
 import { WHATSAPP } from "@/lib/products";
-import { brl, deliveryFee, FREE_DELIVERY_FROM, PRICE_PER_KM } from "@/lib/delivery";
+import { brl, deliveryFee, MIN_FEE, MIN_FEE_UP_TO_KM, PRICE_PER_KM } from "@/lib/delivery";
 import { quoteDistance } from "@/lib/freight.functions";
 
 export const Route = createFileRoute("/checkout")({
@@ -30,7 +30,7 @@ function Checkout() {
   const [km, setKm] = useState<number | null>(null);
   const [quoting, setQuoting] = useState(false);
   const [quoteError, setQuoteError] = useState("");
-  const fee = km == null ? null : deliveryFee(km, subtotal);
+  const fee = km == null ? null : deliveryFee(km);
   const total = subtotal + (fee ?? 0);
 
   const calc = async () => {
@@ -85,7 +85,7 @@ function Checkout() {
           </div>
           {quoteError && <p className="text-sm text-destructive">{quoteError}</p>}
           {km != null && fee != null && <p className="text-sm">Distância: <b>{km.toLocaleString("pt-BR")} km</b> · Frete: <b className="text-primary-glow">{fee === 0 ? "Grátis" : brl(fee)}</b></p>}
-          <p className="text-xs text-muted-foreground">Frete de {brl(PRICE_PER_KM)} por km, saindo de Costa Verde, Várzea Grande. Grátis para pedidos a partir de {brl(FREE_DELIVERY_FROM)}.</p>
+          <p className="text-xs text-muted-foreground">Frete de {brl(MIN_FEE)} até {MIN_FEE_UP_TO_KM} km e + {brl(PRICE_PER_KM)} por km acima disso, saindo de Costa Verde, Várzea Grande.</p>
         </section>
       </form>
       <aside className="h-fit space-y-3 rounded-xl border border-primary bg-card p-5 shadow-glow md:sticky md:top-24">
