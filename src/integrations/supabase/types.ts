@@ -14,7 +14,77 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      produtos: {
+        Row: {
+          categoria: string | null
+          created_at: string
+          descricao: string | null
+          disponivel: boolean
+          id: string
+          imagem_url: string | null
+          nome: string
+          ordem: number
+          preco: number | null
+        }
+        Insert: {
+          categoria?: string | null
+          created_at?: string
+          descricao?: string | null
+          disponivel?: boolean
+          id?: string
+          imagem_url?: string | null
+          nome: string
+          ordem?: number
+          preco?: number | null
+        }
+        Update: {
+          categoria?: string | null
+          created_at?: string
+          descricao?: string | null
+          disponivel?: boolean
+          id?: string
+          imagem_url?: string | null
+          nome?: string
+          ordem?: number
+          preco?: number | null
+        }
+        Relationships: []
+      }
+      sabores: {
+        Row: {
+          created_at: string
+          disponivel: boolean
+          id: string
+          nome: string
+          ordem: number
+          produto_id: string
+        }
+        Insert: {
+          created_at?: string
+          disponivel?: boolean
+          id?: string
+          nome: string
+          ordem?: number
+          produto_id: string
+        }
+        Update: {
+          created_at?: string
+          disponivel?: boolean
+          id?: string
+          nome?: string
+          ordem?: number
+          produto_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sabores_produto_id_fkey"
+            columns: ["produto_id"]
+            isOneToOne: false
+            referencedRelation: "produtos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
