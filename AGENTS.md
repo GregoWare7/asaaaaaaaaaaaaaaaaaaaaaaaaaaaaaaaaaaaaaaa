@@ -30,3 +30,4 @@ use the editor.
 <!-- LOVABLE:END -->
 
 - Delivery distance: use a fixed origin and OpenStreetMap Nominatim + OSRM driving routes in src/lib/freight.functions.ts; destination selection uses a client-only Leaflet map and fee rules stay testable in src/lib/delivery.ts. Why: accurate routes without an API key.
+- Catalog: products/flavors are read from the Supabase `produtos`/`sabores` tables in the browser (src/lib/catalog.ts); /admin is client-only and writes directly with the user's session, relying on existing RLS. Why: owner manages stock without code changes; schema is owner-managed, never migrate it.

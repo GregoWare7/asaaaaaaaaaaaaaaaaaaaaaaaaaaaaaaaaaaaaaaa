@@ -150,7 +150,7 @@ function Checkout() {
     const fullAddress = complement.trim() ? `${address}, ${complement.trim()}` : address;
     const message = [
       `Olá! Sou ${name} e quero fazer um pedido:`,
-      ...lines.map((line) => `• ${line.qty}x ${line.product.name} (${line.flavor}) - ${brl(line.product.price * line.qty)}`),
+      ...lines.map((line) => `• ${line.qty}x ${line.product.name}${line.flavor ? ` (${line.flavor})` : ""} - ${brl(line.product.price * line.qty)}`),
       `Endereço: ${fullAddress}`,
       `Local no mapa: https://www.google.com/maps?q=${destination.lat},${destination.lon}`,
       `Distância pela rota: ${km.toLocaleString("pt-BR")} km (faixa de cobrança: ${billableKm(km)} km)`,
@@ -172,7 +172,7 @@ function Checkout() {
             <div key={line.key} className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
               <div className="min-w-0">
                 <p className="truncate text-sm font-semibold">{line.product.name}</p>
-                <p className="text-xs text-muted-foreground">Sabor: {line.flavor} · {brl(line.product.price)}</p>
+                <p className="text-xs text-muted-foreground">{line.flavor ? `Sabor: ${line.flavor} · ` : ""}{brl(line.product.price)}</p>
               </div>
               <div className="flex items-center gap-2">
                 <Button type="button" size="icon" variant="outline" aria-label="Diminuir" onClick={() => setQty(line.key, line.qty - 1)}><Minus /></Button>
