@@ -167,7 +167,6 @@ function Checkout() {
       ...lines.map((line) => `• ${line.qty}x ${line.product.name}${line.flavor ? ` (${line.flavor})` : ""} - ${brl(line.product.price * line.qty)}`),
       `Endereço: ${fullAddress}`,
       `Local no mapa: https://osm.org/?mlat=${destination.lat.toFixed(5)}&mlon=${destination.lon.toFixed(5)}`,
-      `Distância pela rota: ${km.toLocaleString("pt-BR")} km (faixa de cobrança: ${billableKm(km)} km)`,
       `Subtotal: ${brl(subtotal)}`,
       `Frete: ${brl(fee)}`,
       `Total com frete: ${brl(total)}`,

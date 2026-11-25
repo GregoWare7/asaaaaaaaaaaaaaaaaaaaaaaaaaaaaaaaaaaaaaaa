@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Bike, Store, Plus } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import logo from "@/assets/logo.png.asset.json";
+import heroBanner from "@/assets/hero-banner.png.asset.json";
 import { Button } from "@/components/ui/button";
 import { catalogQuery, productStatus, type Produto } from "@/lib/catalog";
 import { brl } from "@/lib/delivery";
@@ -32,14 +33,19 @@ function Index() {
   const groups = cat === "Todos" ? cats.slice(1) : [cat];
   return (
     <main className="mx-auto max-w-6xl px-4 pb-16">
-      <section className="flex flex-col items-center gap-6 py-10 text-center md:flex-row md:text-left">
-        <img src={logo.url} alt="Logo FB Tabacaria" className="h-40 w-40 rounded-full shadow-glow md:h-56 md:w-56" />
-        <div className="space-y-4">
-          <h1 className="font-display text-5xl leading-none tracking-wide text-glow md:text-7xl">A sua tabacaria em Cuiabá</h1>
-          <p className="text-muted-foreground">Entrega rápida na cidade. Frete a partir de {brl(10)} (até 6,9 km).</p>
-          <div className="flex flex-wrap justify-center gap-3 text-sm md:justify-start">
-            <span className="flex items-center gap-2 rounded-full border border-border px-3 py-1.5"><Bike className="h-4 w-4 text-primary" /> Entrega em até 1h</span>
-            <span className="flex items-center gap-2 rounded-full border border-border px-3 py-1.5"><Store className="h-4 w-4 text-primary" /> (65) 99803-8731</span>
+      <section className="relative mt-4 overflow-hidden rounded-2xl border border-border shadow-glow">
+        <img src={heroBanner.url} alt="" aria-hidden="true" className="absolute inset-0 h-full w-full object-cover object-center" />
+        <div className="absolute inset-0 bg-background/45" />
+        <div className="absolute inset-0 bg-linear-to-t from-background via-background/55 to-transparent" />
+        <div className="relative flex flex-col items-center gap-5 px-4 py-10 text-center md:flex-row md:gap-10 md:px-10 md:py-16 md:text-left">
+          <img src={logo.url} alt="Logo FB Tabacaria" className="h-32 w-32 shrink-0 rounded-full shadow-glow md:h-52 md:w-52" />
+          <div className="space-y-4">
+            <h1 className="font-display text-4xl leading-none tracking-wide text-glow sm:text-5xl md:text-7xl">A sua tabacaria em Cuiabá</h1>
+            <p className="text-muted-foreground">Entrega rápida na cidade. Frete a partir de {brl(10)} (até 6,9 km).</p>
+            <div className="flex flex-wrap justify-center gap-3 text-sm md:justify-start">
+              <span className="flex items-center gap-2 rounded-full border border-border bg-background/60 px-3 py-1.5 backdrop-blur"><Bike className="h-4 w-4 text-primary" /> Entrega em até 1h</span>
+              <span className="flex items-center gap-2 rounded-full border border-border bg-background/60 px-3 py-1.5 backdrop-blur"><Store className="h-4 w-4 text-primary" /> (65) 99803-8731</span>
+            </div>
           </div>
         </div>
       </section>
