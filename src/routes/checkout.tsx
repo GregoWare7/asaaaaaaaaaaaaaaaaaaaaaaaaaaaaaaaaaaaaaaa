@@ -166,7 +166,7 @@ function Checkout() {
       `Olá! Sou ${name} e quero fazer um pedido:`,
       ...lines.map((line) => `• ${line.qty}x ${line.product.name}${line.flavor ? ` (${line.flavor})` : ""} - ${brl(line.product.price * line.qty)}`),
       `Endereço: ${fullAddress}`,
-      `Local no mapa: https://www.google.com/maps?q=${destination.lat},${destination.lon}`,
+      `Local no mapa: https://www.openstreetmap.org/?mlat=${destination.lat}&mlon=${destination.lon}#map=18/${destination.lat}/${destination.lon}`,
       `Distância pela rota: ${km.toLocaleString("pt-BR")} km (faixa de cobrança: ${billableKm(km)} km)`,
       `Subtotal: ${brl(subtotal)}`,
       `Frete: ${brl(fee)}`,
