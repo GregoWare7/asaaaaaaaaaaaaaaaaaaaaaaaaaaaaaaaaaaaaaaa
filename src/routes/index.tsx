@@ -99,7 +99,7 @@ function ProductCard({ p }: { p: Produto }) {
         </div>
       )}
       <div className="mt-3 flex items-center justify-between gap-2">
-        <span className="font-bold">{p.preco == null ? "Consulte" : brl(price)}</span>
+        <span className="font-bold">{p.preco == null ? "Realizar Pedido" : brl(price)}</span>
         <Button size="icon" aria-label={`Adicionar ${p.nome}`} disabled={blocked} onClick={() => { add({ id: p.id, name: p.nome, price }, flavor); setAdded(true); }}><Plus /></Button>
       </div>
       <Dialog open={added} onOpenChange={setAdded}>
