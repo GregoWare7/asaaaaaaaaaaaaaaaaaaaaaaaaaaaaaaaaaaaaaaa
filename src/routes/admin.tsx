@@ -143,7 +143,8 @@ function Panel({ email }: { email: string }) {
     if (error) fail("Não foi possível excluir."); else refresh();
   };
 
-  const list = (data ?? []).filter((p) => !filter || `${p.nome} ${p.categoria ?? ""}`.toLowerCase().includes(filter.toLowerCase()));
+  const list = (data ?? []).filter((p) => !filter || `${p.nome} ${p.categoria ?? ""}`.toLowerCase().includes(filter.toLowerCase()))
+    .sort((a, b) => Number(b.disponivel) - Number(a.disponivel)); // disponíveis primeiro
 
   return (
     <main className="mx-auto max-w-2xl px-3 pb-24 pt-4">

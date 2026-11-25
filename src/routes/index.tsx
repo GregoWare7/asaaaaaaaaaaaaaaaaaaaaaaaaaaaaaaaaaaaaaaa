@@ -26,7 +26,8 @@ export const Route = createFileRoute("/")({
 function Index() {
   const [cat, setCat] = useState("Todos");
   const { data, isLoading, error } = useQuery(catalogQuery);
-  const products = data ?? [];
+  // Esgotados (ou sem nenhum sabor disponível) ficam fora da vitrine.
+  const products = (data ?? []).filter((p) => productStatus(p) === "ok");
   const cats = ["Todos", ...Array.from(new Set(products.map((p) => p.categoria || "Outros")))];
   const groups = cat === "Todos" ? cats.slice(1) : [cat];
   return (
@@ -49,6 +50,7 @@ function Index() {
       </div>
       {isLoading && <p className="py-10 text-center text-muted-foreground">Carregando produtos...</p>}
       {error && <p className="py-10 text-center text-destructive">Não foi possível carregar os produtos. Atualize a página.</p>}
+      {!isLoading && !error && products.length === 0 && <p className="py-10 text-center text-muted-foreground">Nenhum produto disponível no momento.</p>}
       {groups.map((g) => (
         <section key={g} className="mb-10">
           <h2 className="mb-4 font-display text-4xl tracking-wide text-glow">{g}</h2>
