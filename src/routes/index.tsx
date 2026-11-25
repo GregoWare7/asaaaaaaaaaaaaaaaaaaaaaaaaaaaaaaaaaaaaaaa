@@ -1,3 +1,4 @@
+import { assetUrl } from "@/lib/asset-url";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -34,11 +35,11 @@ function Index() {
   return (
     <main className="mx-auto max-w-6xl px-4 pb-16">
       <section className="relative mt-4 overflow-hidden rounded-2xl border border-border shadow-glow">
-        <img src={heroBanner.url} alt="" aria-hidden="true" className="absolute inset-0 h-full w-full object-cover object-center" />
+        <img src={assetUrl(heroBanner.url)} alt="" aria-hidden="true" className="absolute inset-0 h-full w-full object-cover object-center" />
         <div className="absolute inset-0 bg-background/45" />
         <div className="absolute inset-0 bg-linear-to-t from-background via-background/55 to-transparent" />
         <div className="relative flex flex-col items-center gap-5 px-4 py-10 text-center md:flex-row md:gap-10 md:px-10 md:py-16 md:text-left">
-          <img src={logo.url} alt="Logo FB Tabacaria" className="h-32 w-32 shrink-0 rounded-full shadow-glow md:h-52 md:w-52" />
+          <img src={assetUrl(logo.url)} alt="Logo FB Tabacaria" className="h-32 w-32 shrink-0 rounded-full shadow-glow md:h-52 md:w-52" />
           <div className="space-y-4">
             <h1 className="font-display text-4xl leading-none tracking-wide text-glow sm:text-5xl md:text-7xl">A sua tabacaria em Cuiabá</h1>
             <p className="text-muted-foreground">Entrega rápida na cidade. Frete a partir de {brl(10)} (até 6,9 km).</p>

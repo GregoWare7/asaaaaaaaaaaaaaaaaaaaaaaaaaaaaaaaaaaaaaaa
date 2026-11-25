@@ -1,4 +1,5 @@
 import { queryOptions } from "@tanstack/react-query";
+import { assetUrl } from "@/lib/asset-url";
 import { supabase } from "@/integrations/supabase/client";
 
 export type Sabor = { id: string; produto_id: string; nome: string; disponivel: boolean; ordem: number };
@@ -24,6 +25,7 @@ export async function fetchCatalog(): Promise<Produto[]> {
   return (p.data ?? []).map((prod) => ({
     ...prod,
     preco: prod.preco == null ? null : Number(prod.preco),
+    imagem_url: assetUrl(prod.imagem_url),
     sabores: (s.data ?? []).filter((x) => x.produto_id === prod.id),
   }));
 }
