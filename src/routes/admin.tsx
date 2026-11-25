@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState, type FormEvent } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Loader2, LogOut, Pencil, Plus, Trash2 } from "lucide-react";
+import { ImageOff, ImagePlus, Loader2, LogOut, Pencil, Plus, Search, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import type { Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
@@ -73,6 +73,9 @@ function Panel({ email }: { email: string }) {
   const [prodForm, setProdForm] = useState<ProdForm | null>(null);
   const [saborForm, setSaborForm] = useState<SaborForm | null>(null);
   const [filter, setFilter] = useState("");
+  const [onlyNoPhoto, setOnlyNoPhoto] = useState(false);
+  const [photoFor, setPhotoFor] = useState<{ p: Produto; url: string } | null>(null);
+  const [photoOk, setPhotoOk] = useState(false);
 
   const patch = (fn: (list: Produto[]) => Produto[]) => qc.setQueryData(catalogQuery.queryKey, (old) => (old ? fn(old) : old));
   const refresh = () => qc.invalidateQueries({ queryKey: catalogQuery.queryKey });
@@ -143,7 +146,18 @@ function Panel({ email }: { email: string }) {
     if (error) fail("Não foi possível excluir."); else refresh();
   };
 
-  const list = (data ?? []).filter((p) => !filter || `${p.nome} ${p.categoria ?? ""}`.toLowerCase().includes(filter.toLowerCase()))
+  const savePhoto = async (e: FormEvent) => {
+    e.preventDefault();
+    if (!photoFor) return;
+    const url = photoFor.url.trim() || null;
+    const { error } = await supabase.from("produtos").update({ imagem_url: url }).eq("id", photoFor.p.id);
+    if (error) { toast.error("Não foi possível salvar a foto."); return; }
+    patch((l) => l.map((x) => (x.id === photoFor.p.id ? { ...x, imagem_url: url } : x)));
+    toast.success(url ? "Foto salva" : "Foto removida");
+    setPhotoFor(null);
+  };
+  const semFoto = (data ?? []).filter((p) => !p.imagem_url).length;
+  const list = (data ?? []).filter((p) => !onlyNoPhoto || !p.imagem_url).filter((p) => !filter || `${p.nome} ${p.categoria ?? ""}`.toLowerCase().includes(filter.toLowerCase()))
     .sort((a, b) => Number(b.disponivel) - Number(a.disponivel)); // disponíveis primeiro
 
   return (
@@ -154,13 +168,28 @@ function Panel({ email }: { email: string }) {
       </div>
       <Button size="lg" className="mb-3 h-14 w-full text-lg" onClick={() => setProdForm({ nome: "", categoria: "", descricao: "", preco: "", imagem_url: "" })}><Plus />Novo produto</Button>
       <Input className="mb-4 h-12" placeholder="Buscar produto" value={filter} onChange={(e) => setFilter(e.target.value)} />
+      {semFoto > 0 && (
+        <button type="button" onClick={() => setOnlyNoPhoto((v) => !v)}
+          className={`mb-4 flex w-full items-center gap-3 rounded-xl border p-4 text-left ${onlyNoPhoto ? "border-primary bg-primary/10" : "border-border bg-card"}`}>
+          <ImageOff className="h-6 w-6 shrink-0 text-destructive" />
+          <span className="flex-1"><b>{semFoto} produto{semFoto > 1 ? "s" : ""} sem foto</b><br />
+            <span className="text-sm text-muted-foreground">{onlyNoPhoto ? "Mostrando só os sem foto. Toque para ver todos." : "Toque para ver só esses."}</span></span>
+        </button>
+      )}
+      {onlyNoPhoto && semFoto === 0 && <p className="mb-4 text-center text-primary">Todos os produtos têm foto!</p>}
       {isLoading && <Loader2 className="mx-auto animate-spin" />}
 
       <div className="space-y-4">
         {list.map((p) => (
           <section key={p.id} className="rounded-xl border border-border bg-card p-4">
             <div className="flex items-start justify-between gap-3">
-              <div className="min-w-0">
+              <button type="button" onClick={() => { setPhotoOk(false); setPhotoFor({ p, url: p.imagem_url ?? "" }); }}
+                aria-label={p.imagem_url ? `Trocar foto de ${p.nome}` : `Adicionar foto a ${p.nome}`}
+                className={`grid h-20 w-20 shrink-0 place-items-center overflow-hidden rounded-lg border-2 ${p.imagem_url ? "border-border" : "border-dashed border-destructive text-destructive"}`}>
+                {p.imagem_url ? <img src={p.imagem_url} alt="" className="h-full w-full object-cover" />
+                  : <span className="flex flex-col items-center text-[11px] font-bold"><ImagePlus className="h-6 w-6" />Sem foto</span>}
+              </button>
+              <div className="min-w-0 flex-1">
                 <p className="text-xs text-muted-foreground">{p.categoria ?? "Sem categoria"}</p>
                 <h2 className="text-lg font-bold leading-tight">{p.nome}</h2>
                 <p className="text-sm text-muted-foreground">{p.preco == null ? "Sem preço" : brl(p.preco)}</p>
@@ -206,6 +235,37 @@ function Panel({ email }: { email: string }) {
             </form>
           )}
           <DialogFooter><Button form="prod-form" type="submit" size="lg" className="h-12 w-full">Salvar</Button></DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!photoFor} onOpenChange={(o) => !o && setPhotoFor(null)}>
+        <DialogContent>
+          <DialogHeader><DialogTitle>Foto: {photoFor?.p.nome}</DialogTitle></DialogHeader>
+          {photoFor && (
+            <form id="photo-form" onSubmit={savePhoto} className="space-y-3">
+              <ol className="list-decimal space-y-1 pl-5 text-sm text-muted-foreground">
+                <li>Toque em <b>Procurar foto</b> e encontre a imagem do produto.</li>
+                <li>Segure o dedo na foto e escolha <b>Copiar endereço da imagem</b>.</li>
+                <li>Cole o link abaixo e toque em <b>Salvar foto</b>.</li>
+              </ol>
+              <Button asChild variant="secondary" className="h-12 w-full">
+                <a href={`https://www.google.com/search?tbm=isch&q=${encodeURIComponent(`${photoFor.p.nome} pod`)}`} target="_blank" rel="noopener noreferrer"><Search />Procurar foto</a>
+              </Button>
+              <Input className="h-12" type="url" placeholder="Cole aqui o link da foto" value={photoFor.url}
+                onChange={(e) => { setPhotoOk(false); setPhotoFor({ ...photoFor, url: e.target.value }); }} />
+              {photoFor.url.trim() && (
+                <div className="grid aspect-square w-full place-items-center overflow-hidden rounded-lg bg-accent">
+                  <img key={photoFor.url} src={photoFor.url.trim()} alt="Prévia" className="h-full w-full object-contain"
+                    onLoad={() => setPhotoOk(true)} onError={() => setPhotoOk(false)} />
+                </div>
+              )}
+              {photoFor.url.trim() && !photoOk && <p className="text-sm text-destructive">A prévia não carregou. Confira se o link é de uma imagem.</p>}
+            </form>
+          )}
+          <DialogFooter className="gap-2">
+            {photoFor?.p.imagem_url && <Button type="button" variant="outline" className="h-12 text-destructive" onClick={() => setPhotoFor(photoFor && { ...photoFor, url: "" })}>Remover foto</Button>}
+            <Button form="photo-form" type="submit" size="lg" className="h-12 w-full" disabled={!!photoFor?.url.trim() && !photoOk}>Salvar foto</Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
 
