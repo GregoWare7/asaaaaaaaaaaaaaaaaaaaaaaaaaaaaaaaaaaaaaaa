@@ -1,4 +1,6 @@
-import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { catalogQuery } from "@/lib/catalog";
 
 export type CartProduct = { id: string; name: string; price: number };
 type Line = { key: string; product: CartProduct; flavor: string; qty: number };
@@ -7,7 +9,16 @@ const CartCtx = createContext<Ctx | null>(null);
 const KEY = "fb-cart-v3";
 
 export function CartProvider({ children }: { children: ReactNode }) {
-  const [lines, setLines] = useState<Line[]>([]);
+  const [stored, setLines] = useState<Line[]>([]);
+  const catalog = useQuery(catalogQuery).data;
+  // Sempre usa o preço atual do banco (carrinhos antigos podem ter preço 0 salvo).
+  const lines = useMemo(() => {
+    if (!catalog) return stored;
+    return stored.map((l) => {
+      const prod = catalog.find((c) => c.id === l.product.id);
+      return prod && prod.preco != null ? { ...l, product: { ...l.product, price: prod.preco } } : l;
+    });
+  }, [stored, catalog]);
   useEffect(() => { try { setLines(JSON.parse(localStorage.getItem(KEY) || "[]")); } catch { /* vazio */ } }, []);
   const save = (n: Line[]) => { setLines(n); localStorage.setItem(KEY, JSON.stringify(n)); };
   const value: Ctx = {
