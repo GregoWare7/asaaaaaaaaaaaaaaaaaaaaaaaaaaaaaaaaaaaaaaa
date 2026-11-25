@@ -17,17 +17,39 @@ function validatePoint(input: { lat: number; lon: number }): DeliveryPoint {
   return { lat, lon };
 }
 
+// Servidores públicos de rota (OSRM). Às vezes um deles fica lento ou recusa;
+// então tentamos o próximo antes de desistir.
+const ROUTE_SERVERS = [
+  "https://router.project-osrm.org/route/v1/driving",
+  "https://routing.openstreetmap.de/routed-car/route/v1/driving",
+  "https://router.project-osrm.org/route/v1/driving",
+];
+
 async function routeFromOrigin(point: DeliveryPoint): Promise<RouteResult> {
   // OSRM usa longitude,latitude e devolve a distância em metros.
-  const response = await fetch(
-    `https://router.project-osrm.org/route/v1/driving/${ORIGIN.lon},${ORIGIN.lat};${point.lon},${point.lat}?overview=false`,
-    { headers: { Accept: "application/json" } },
-  );
-  if (!response.ok) throw new Error(`Falha ao calcular rota (${response.status})`);
-  const body = (await response.json()) as { routes?: { distance: number }[] };
-  const meters = body.routes?.[0]?.distance;
-  if (meters == null) return { ok: false, error: "Não foi possível calcular a rota até esse endereço." };
-  return { ok: true, km: Math.round(meters / 100) / 10, point };
+  const coords = `${ORIGIN.lon},${ORIGIN.lat};${point.lon},${point.lat}`;
+  let noRoute = false;
+  for (const base of ROUTE_SERVERS) {
+    try {
+      const response = await fetch(`${base}/${coords}?overview=false`, {
+        headers: { Accept: "application/json", "User-Agent": UA },
+        signal: AbortSignal.timeout(8000),
+      });
+      if (!response.ok) { console.error(`Rota falhou em ${base}: ${response.status}`); continue; }
+      const body = (await response.json()) as { code?: string; routes?: { distance: number }[] };
+      const meters = body.routes?.[0]?.distance;
+      if (meters == null) { noRoute = true; continue; }
+      return { ok: true, km: Math.round(meters / 100) / 10, point };
+    } catch (error) {
+      console.error(`Rota falhou em ${base}:`, error);
+    }
+  }
+  return {
+    ok: false,
+    error: noRoute
+      ? "Não encontramos um caminho de carro até esse ponto. Toque numa rua próxima no mapa."
+      : "O serviço de rotas está instável agora. Toque no ponto do mapa de novo em alguns segundos.",
+  };
 }
 
 export const quoteRoute = createServerFn({ method: "POST" })
