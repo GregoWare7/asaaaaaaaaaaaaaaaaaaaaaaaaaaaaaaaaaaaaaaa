@@ -98,17 +98,23 @@ export default function DeliveryMap({ selected, onSelect }: Props) {
       return;
     }
     setLocating(true);
-    navigator.geolocation.getCurrentPosition(
-      ({ coords }) => {
-        setLocating(false);
-        onSelectRef.current({ lat: coords.latitude, lon: coords.longitude });
-      },
-      () => {
-        setLocating(false);
-        setGeoError("Não foi possível obter sua localização. Permita o acesso ou toque no mapa.");
-      },
-      { enableHighAccuracy: true, timeout: 12000, maximumAge: 60000 },
-    );
+    const ok = ({ coords }: GeolocationPosition) => {
+      setLocating(false);
+      onSelectRef.current({ lat: coords.latitude, lon: coords.longitude });
+    };
+    const explain = (err: GeolocationPositionError) => {
+      setLocating(false);
+      setGeoError(
+        err.code === err.PERMISSION_DENIED
+          ? "A localização está bloqueada. Libere o acesso à localização no navegador (ícone ao lado do endereço do site) ou toque no mapa."
+          : "Não conseguimos achar sua localização agora. Ligue o GPS e tente de novo, ou toque no mapa.",
+      );
+    };
+    // Tenta com GPS; se demorar ou falhar, tenta de novo com a localização aproximada.
+    navigator.geolocation.getCurrentPosition(ok, (err) => {
+      if (err.code === err.PERMISSION_DENIED) return explain(err);
+      navigator.geolocation.getCurrentPosition(ok, explain, { enableHighAccuracy: false, timeout: 15000, maximumAge: 300000 });
+    }, { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 });
   };
 
   return (

@@ -47,6 +47,7 @@ function Checkout() {
   const [quoteError, setQuoteError] = useState("");
   const [mapOpen, setMapOpen] = useState(false);
   const requestRef = useRef(0);
+  const [waUrl, setWaUrl] = useState("");
 
   const outsideArea = km != null && isOutsideDeliveryArea(km);
   const fee = km == null ? null : deliveryFee(km);
@@ -128,6 +129,19 @@ function Checkout() {
     }
   };
 
+  if (waUrl) {
+    return (
+      <main className="mx-auto max-w-xl space-y-4 px-4 py-20 text-center">
+        <h1 className="font-display text-5xl text-glow">Quase lá!</h1>
+        <p className="text-muted-foreground">Se o WhatsApp não abriu sozinho, toque no botão abaixo para enviar seu pedido.</p>
+        <Button asChild size="lg" className="h-14 w-full text-lg">
+          <a href={waUrl} target="_blank" rel="noopener noreferrer">Abrir WhatsApp e enviar pedido</a>
+        </Button>
+        <Button variant="outline" size="lg" className="w-full" onClick={() => { clear(); setWaUrl(""); }}>Já enviei, fazer novo pedido</Button>
+      </main>
+    );
+  }
+
   if (lines.length === 0) {
     return (
       <main className="mx-auto max-w-xl px-4 py-20 text-center">
@@ -158,9 +172,17 @@ function Checkout() {
       `Frete: ${brl(fee)}`,
       `Total com frete: ${brl(total)}`,
     ].join("\n");
-    window.open(`https://wa.me/${WHATSAPP}?text=${encodeURIComponent(message)}`, "_blank");
-    toast.success("Pedido enviado pelo WhatsApp!");
-    clear();
+    const url = `https://wa.me/${WHATSAPP}?text=${encodeURIComponent(message)}`;
+    setWaUrl(url);
+    // Abre sempre em uma nova aba: o WhatsApp não pode abrir dentro de outra página.
+    const a = document.createElement("a");
+    a.href = url;
+    a.target = "_blank";
+    a.rel = "noopener noreferrer";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    toast.success("Abrindo o WhatsApp com seu pedido...");
   };
 
   return (
