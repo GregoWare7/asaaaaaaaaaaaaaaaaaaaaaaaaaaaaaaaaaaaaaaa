@@ -3,7 +3,7 @@ import L from "leaflet";
 import { Crosshair, Loader2 } from "lucide-react";
 import "leaflet/dist/leaflet.css";
 import { Button } from "@/components/ui/button";
-import { ORIGIN, type DeliveryPoint } from "@/lib/delivery";
+import { type DeliveryPoint } from "@/lib/delivery";
 
 type Props = {
   selected: DeliveryPoint | null;
@@ -25,8 +25,8 @@ export default function DeliveryMap({ selected, onSelect }: Props) {
 
   useEffect(() => {
     if (!elementRef.current) return;
-    const initial = initialSelectedRef.current ?? ORIGIN;
-    const map = L.map(elementRef.current).setView([initial.lat, initial.lon], initialSelectedRef.current ? 16 : 14);
+    const initial = initialSelectedRef.current ?? { lat: -15.61, lon: -56.09 };
+    const map = L.map(elementRef.current).setView([initial.lat, initial.lon], initialSelectedRef.current ? 16 : 12);
     mapRef.current = map;
 
     L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
@@ -34,19 +34,6 @@ export default function DeliveryMap({ selected, onSelect }: Props) {
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
     }).addTo(map);
 
-    const originIcon = L.divIcon({
-      className: "delivery-map-icon",
-      html: '<span class="delivery-map-pin delivery-map-pin--origin"></span>',
-      iconSize: [24, 24],
-      iconAnchor: [12, 12],
-    });
-    L.marker([ORIGIN.lat, ORIGIN.lon], {
-      icon: originIcon,
-      title: "Loja FB Tabacaria",
-      alt: "Loja FB Tabacaria",
-    })
-      .bindPopup("<strong>Loja FB Tabacaria</strong><br>Saída das entregas")
-      .addTo(map);
 
     map.on("click", (event: L.LeafletMouseEvent) => {
       onSelectRef.current({ lat: event.latlng.lat, lon: event.latlng.lng });
@@ -127,7 +114,7 @@ export default function DeliveryMap({ selected, onSelect }: Props) {
       </Button>
       {geoError && <p className="text-sm text-destructive">{geoError}</p>}
       <div ref={elementRef} className="h-[55vh] min-h-[280px] max-h-[460px] w-full rounded-lg border border-border" aria-label="Mapa para escolher o local de entrega" />
-      <p className="text-xs text-muted-foreground">Toque no mapa ou arraste o marcador roxo. O marcador verde é a loja.</p>
+      <p className="text-xs text-muted-foreground">Toque no mapa ou arraste o marcador roxo.</p>
     </div>
   );
 }

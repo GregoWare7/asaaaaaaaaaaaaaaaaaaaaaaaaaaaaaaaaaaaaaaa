@@ -80,7 +80,7 @@ function ProductCard({ p }: { p: Produto }) {
           : <span className="text-center font-display text-3xl text-primary text-glow">{p.categoria}</span>}
         {blocked && <span className="absolute left-2 top-2 rounded-full bg-destructive px-2 py-0.5 text-xs font-bold text-destructive-foreground">{status === "esgotado" ? "Esgotado" : "Indisponível"}</span>}
       </div>
-      <h3 className={`flex-1 text-sm font-semibold md:text-base ${blocked ? "line-through" : ""}`}>{p.nome}</h3>
+      <h3 className={`text-sm font-semibold md:text-base ${blocked ? "line-through" : ""}`}>{p.nome}</h3>
       {p.descricao && <p className="mt-1 text-xs text-muted-foreground">{p.descricao}</p>}
       {p.sabores.length > 0 && (
         <div className="mt-2">
@@ -98,7 +98,7 @@ function ProductCard({ p }: { p: Produto }) {
           </div>
         </div>
       )}
-      <div className="mt-3 flex items-center justify-between gap-2">
+      <div className="mt-auto flex items-center justify-between gap-2 pt-3">
         <span className="font-bold">{p.preco == null ? "Realizar Pedido" : brl(price)}</span>
         <Button size="icon" aria-label={`Adicionar ${p.nome}`} disabled={blocked} onClick={() => { add({ id: p.id, name: p.nome, price }, flavor); setAdded(true); }}><Plus /></Button>
       </div>

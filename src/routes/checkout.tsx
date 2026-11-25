@@ -166,13 +166,13 @@ function Checkout() {
       `Olá! Sou ${name} e quero fazer um pedido:`,
       ...lines.map((line) => `• ${line.qty}x ${line.product.name}${line.flavor ? ` (${line.flavor})` : ""} - ${brl(line.product.price * line.qty)}`),
       `Endereço: ${fullAddress}`,
-      `Local no mapa: https://www.openstreetmap.org/?mlat=${destination.lat}&mlon=${destination.lon}#map=18/${destination.lat}/${destination.lon}`,
+      `Local no mapa: https://osm.org/?mlat=${destination.lat.toFixed(5)}&mlon=${destination.lon.toFixed(5)}`,
       `Distância pela rota: ${km.toLocaleString("pt-BR")} km (faixa de cobrança: ${billableKm(km)} km)`,
       `Subtotal: ${brl(subtotal)}`,
       `Frete: ${brl(fee)}`,
       `Total com frete: ${brl(total)}`,
     ].join("\n");
-    const url = `https://wa.me/${WHATSAPP}?text=${encodeURIComponent(message)}`;
+    const url = `https://api.whatsapp.com/send?phone=${WHATSAPP}&text=${encodeURIComponent(message)}`;
     setWaUrl(url);
     // Abre sempre em uma nova aba: o WhatsApp não pode abrir dentro de outra página.
     const a = document.createElement("a");
@@ -257,7 +257,7 @@ function Checkout() {
               <p className="mt-1">Frete: <b className="text-primary-glow">{brl(fee)}</b></p>
             </div>
           )}
-          <p className="text-xs text-muted-foreground">Frete de {brl(10)} de 100 metros até 6,9 km, depois +{brl(2)} por km. Entregas até {MAX_DELIVERY_KM} km, saindo do Residencial Chapada das Cerejeiras.</p>
+          <p className="text-xs text-muted-foreground">Frete de {brl(10)} de 100 metros até 6,9 km, depois +{brl(2)} por km. Entregas até {MAX_DELIVERY_KM} km.</p>
         </section>
       </form>
 

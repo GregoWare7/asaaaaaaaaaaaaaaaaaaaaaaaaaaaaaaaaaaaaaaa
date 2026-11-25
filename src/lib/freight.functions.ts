@@ -22,7 +22,7 @@ function validatePoint(input: { lat: number; lon: number }): DeliveryPoint {
 const ROUTE_SERVERS = [
   "https://router.project-osrm.org/route/v1/driving",
   "https://routing.openstreetmap.de/routed-car/route/v1/driving",
-  "https://router.project-osrm.org/route/v1/driving",
+  "https://routing.openstreetmap.de/routed-car/route/v1/driving",
 ];
 
 async function routeFromOrigin(point: DeliveryPoint): Promise<RouteResult> {
@@ -33,7 +33,7 @@ async function routeFromOrigin(point: DeliveryPoint): Promise<RouteResult> {
     try {
       const response = await fetch(`${base}/${coords}?overview=false`, {
         headers: { Accept: "application/json", "User-Agent": UA },
-        signal: AbortSignal.timeout(8000),
+        signal: AbortSignal.timeout(10000),
       });
       if (!response.ok) { console.error(`Rota falhou em ${base}: ${response.status}`); continue; }
       const body = (await response.json()) as { code?: string; routes?: { distance: number }[] };
