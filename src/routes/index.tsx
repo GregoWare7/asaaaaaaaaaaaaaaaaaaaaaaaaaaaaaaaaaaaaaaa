@@ -20,6 +20,8 @@ export const Route = createFileRoute("/")({
       { property: "og:description", content: "Entrega local em Cuiabá." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      { property: "og:image", content: assetUrl(heroBanner.url) },
+      { name: "twitter:image", content: assetUrl(heroBanner.url) },
     ],
   }),
   component: Index,
